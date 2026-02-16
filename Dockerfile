@@ -1,7 +1,5 @@
 FROM jenkins/jenkins:2.550
 
-ENV http_proxy=http://111.84.55.241:8080
-ENV https_proxy=http://111.84.55.241:8080
 ENV DEBIAN_FRONTEND=noninteractive
 
 USER root
