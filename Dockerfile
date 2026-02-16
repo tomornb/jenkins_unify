@@ -27,10 +27,24 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Create user + docker group access
-RUN useradd -m -r -u 51011 omropr && \
-    groupmod -g 495 docker || true && \
-    usermod -aG docker jenkins && \
-    usermod -aG docker omropr && \
+RUN set -eux; \
+    # สร้าง user (ถ้ายังไม่มี)
+    id -u omropr >/dev/null 2>&1 || useradd -m -u 51011 omropr; \
+    \
+    # สร้าง group docker ถ้ายังไม่มี (กำหนด GID 495 ถ้ายังว่าง)
+    if ! getent group docker >/dev/null; then \
+      if getent group 495 >/dev/null; then \
+        groupadd docker; \
+      else \
+        groupadd -g 495 docker; \
+      fi; \
+    fi; \
+    \
+    # เพิ่ม jenkins + omropr เข้า group docker
+    usermod -aG docker jenkins; \
+    usermod -aG docker omropr; \
+    \
+    # ปรับ owner โฟลเดอร์ Jenkins home
     chown -R omropr:omropr "$JENKINS_HOME"
 
 USER omropr
